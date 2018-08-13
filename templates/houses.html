@@ -1,0 +1,111 @@
+<html>
+  <head>
+    <title>Beach Houses</title>
+    <style>
+    td img {
+      height: 80pt;
+    }
+    table, th, td {
+      border-collapse: collapse;
+      border: 1pt solid rgb(200,200,200);
+      padding: 15pt;
+    }
+    tbody {
+      overflow: scroll;
+      height: 100pt;
+    }
+    </style>
+  </head>
+  <body>
+    <h3>
+      <p>
+        {{ house_count }} houses
+      //
+        Searching:
+        {% if oceanfront and oceanfront.lower() == "true" %}
+          Oceanfront
+        {% else %}
+          All
+        {% end %}
+        homes
+      //
+        {% if four_by_four and four_by_four.lower() == "true" %}
+        4x4 houses: Only these
+        {% elif four_by_four and four_by_four.lower() == "false" %}
+        4x4 houses: Excluded
+        {% else %}
+        {% end %}
+      //
+        Sorted by:
+        {% if sorted_by_cost %}
+          Cost
+        {% else %}
+          None
+        {% end %}
+        //
+        <a href="?">view all</a>
+        //
+        <a href="?sort=cost&oceanfront=true&4x4=false">custom search</a>
+        //
+        <a href="?sort=cost&oceanfront=true&4x4=false&start_date=2019-06-01&end_date=2019-08-01">custom summer 2019</a>
+      </p>
+    </h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Agency</th>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Location</th>
+          <th>Highest Cost</th>
+          <th>Capacity</th>
+          <th>Cost per bed</th>
+          <th>Link</th>
+          {% for arrival_date in arrival_dates %}
+          <th>
+            {{ datetime.datetime.fromtimestamp(978285600 + arrival_date).strftime("%b %-d, %Y") }}
+          </th>
+          {% end %}
+          <!-- <th>Availabilities</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        {% for house in houses %}
+      <tr>
+        {% block house %}
+          <td>{{ house.get("rentalAgency", "") }}</td>
+          <td>
+            {% if house.get("images") %}
+            <a href="{{ house.get("images")[0] }}" target="_blank"><img src="{{ house.get("images")[0] }}"/></a>
+            {% end %}
+          </td>
+          <td>{{ house["name"] }}</td>
+          <td>
+            {{ house.get("regionName", "??") }}
+            [<a href="http://maps.google.com/?q={{ house.get("latitude", "") }},{{ house.get("longitude", "") }}" target=_blank>map it</a>]
+            [<a href="?nearby_lat={{ house.get("latitude", "") }}&nearby_long={{ house.get("longitude", "") }}">nearby</a>]
+          </td>
+          <td>${{ house.get("maxRate", "?") }}</td>
+          <td>{{ house.get("bedrooms", "?") }} bed / {{ house.get("bathrooms", "?") }} bath</td>
+          <td>${{ round(house.get("maxRate", 0) / house.get("bedrooms", 1)) }}</td>
+          <td><a href="{{ house.get("url", "") }}" target=_blank>{{ house.get("url", "")[:40] }}&hellip;</a></td>
+
+            {% if house.get("availability") %}
+              {% for arrival_date in arrival_dates %}
+                <td>
+                  {% for availability in house.get("availability") %}
+                    {% if availability.get("isAvailable") and (availability.get("arrivalDate") == arrival_date) or (availability.get("arrivalDate") - 86400 == arrival_date) or (availability.get("arrivalDate") + 86400 == arrival_date) %}
+                      ${{ round(availability.get("totalCost")) }}
+                      {% break %}
+                    {% end %}
+                  {% end %}
+                </td>
+              {% end %}
+            {% end %}
+        {% end %}
+      </tr>
+      {% end %}
+    </tbody>
+    </table>
+  </body>
+</html>
