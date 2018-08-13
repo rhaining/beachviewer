@@ -9,7 +9,8 @@ class BeachHandler(tornado.web.RequestHandler):
     def get(self):
         username = os.environ.get("MONGO_USER")
         password = os.environ.get("MONGO_PASS")
-        mongo_url = "mongodb+srv://%s:%s@cluster0-3mbqw.mongodb.net/test?retryWrites=true" % (username, password)
+        server = os.environ.get("MONGO_HOST")
+        mongo_url = "mongodb+srv://%s:%s@%s/test?retryWrites=true" % (username, password, server)
         myclient = pymongo.MongoClient(mongo_url)
         beach_db = myclient["beach"]
         house_collection = beach_db["house"]
