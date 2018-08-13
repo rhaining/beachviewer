@@ -88,6 +88,6 @@ class BeachHandler(tornado.web.RequestHandler):
 
         arrival_dates.sort()
 
-        loader = tornado.template.Loader("./templates")
+        loader = tornado.template.Loader("templates")
         html_output = loader.load("houses.html").generate(house_count=len(houses), houses=houses, arrival_dates=arrival_dates, oceanfront=oceanfront, sorted_by_cost=sorted_by_cost, four_by_four=four_by_four)
         self.write(html_output)
