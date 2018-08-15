@@ -37,17 +37,14 @@
         {% end %}
       //
         Sorted by:
-        {% if sorted_by_cost %}
-          Cost
-        {% else %}
-          None
-        {% end %}
-        //
+        {{ sorted_by }}
+      </p>
+        <p>
         <a href="?">view all</a>
         //
-        <a href="?sort=cost&oceanfront=true&4x4=false">custom search</a>
+        <a href="?sort=beds&oceanfront=true&4x4=false">search oceanfront, no 4x4, sort by beds</a>
         //
-        <a href="?sort=cost&oceanfront=true&4x4=false&start_date=2019-06-01&end_date=2019-08-01">custom summer 2019</a>
+        <a href="?sort=beds&oceanfront=true&4x4=false&start_date=2019-06-01&end_date=2019-08-01">search oceanfront, no 4x4, sort by beds, just summer 2019</a>
       </p>
     </h3>
     <table>

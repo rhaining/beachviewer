@@ -56,13 +56,16 @@ class BeachHandler(tornado.web.RequestHandler):
         house_query = house_collection.find(house_query_options)
 
         sort_query = self.get_argument('sort', None)
-        sorted_by_cost = False
+        sorted_by = None
         if sort_query:
             sort_query_list = sort_query.split(",")
             for option in sort_query_list:
                 if option == "cost":
                     house_query.sort("maxRate", -1)
-                    sorted_by_cost = True
+                    sorted_by = "cost"
+                elif option == "beds":
+                    house_query.sort("bedrooms", -1)
+                    sorted_by = "beds"
 
         houses = []
         arrival_dates = []
@@ -90,5 +93,5 @@ class BeachHandler(tornado.web.RequestHandler):
 
         templates_dir = os.environ.get("TEMPLATES_DIR")
         loader = tornado.template.Loader(templates_dir)
-        html_output = loader.load("houses.html").generate(house_count=len(houses), houses=houses, arrival_dates=arrival_dates, oceanfront=oceanfront, sorted_by_cost=sorted_by_cost, four_by_four=four_by_four)
+        html_output = loader.load("houses.html").generate(house_count=len(houses), houses=houses, arrival_dates=arrival_dates, oceanfront=oceanfront, sorted_by=sorted_by, four_by_four=four_by_four)
         self.write(html_output)
