@@ -9,44 +9,78 @@
       border-collapse: collapse;
       border: 1pt solid rgb(200,200,200);
       padding: 15pt;
+      color: rgb(50,50,50);
     }
     tbody {
       overflow: scroll;
       height: 100pt;
     }
+    #header {
+      margin-bottom: 1em;
+      color: rgb(150,150,150);
+    }
+    #house_count {
+      font-size: 1.7em;
+      color: #588c7e;
+      font-weight: bold;
+    }
+    #search_params {
+    }
+    .search_param_section {
+      margin-right: 20pt;
+    }
+    #saved_searches {
+
+    }
+    #saved_searches a {
+      margin-right: 20pt;
+    }
+    #realty_list {
+    }
+    a {
+      color: #d96459;
+    }
     </style>
   </head>
   <body>
-    <h3>
-      <p>
-        {{ house_count }} houses
-      //
-        Searching:
+      <div id="header">
+        <div id="house_count">{{ house_count }} houses found</div>
+        <div id="search_params">
+      <span class="search_param_section">
+        Currently searching:
         {% if oceanfront and oceanfront.lower() == "true" %}
           Oceanfront
         {% else %}
           All
         {% end %}
         homes
-      //
+      </span>
+      <span class="search_param_section">
         {% if four_by_four and four_by_four.lower() == "true" %}
         4x4 houses: Only these
         {% elif four_by_four and four_by_four.lower() == "false" %}
         4x4 houses: Excluded
         {% else %}
         {% end %}
-      //
+      </span>
+      <span class="search_param_section">
         Sorted by:
         {{ sorted_by }}
-      </p>
-        <p>
-        <a href="?">view all</a>
-        //
+      </span>
+    </div>
+        <div id="saved_searches">
+          Saved searches:
+        <a href="?">view all houses</a>
+
         <a href="?sort=beds&oceanfront=true&4x4=false">search oceanfront, no 4x4, sort by beds</a>
-        //
+
         <a href="?sort=beds&oceanfront=true&4x4=false&start_date=2019-06-01&end_date=2019-08-01">search oceanfront, no 4x4, sort by beds, just summer 2019</a>
-      </p>
-    </h3>
+      </div>
+      <div id="realty_list">
+        (Currently searching: Twiddy, Carolina Beach Realty, Beach Realty NC.)
+      </div>
+    </div>
+
     <table>
       <thead>
         <tr>
@@ -86,7 +120,7 @@
           <td>${{ house.get("maxRate", "?") }}</td>
           <td>{{ house.get("bedrooms", "?") }} bed / {{ house.get("bathrooms", "?") }} bath</td>
           <td>${{ round(house.get("maxRate", 0) / house.get("bedrooms", 1)) }}</td>
-          <td><a href="{{ house.get("url", "") }}" target=_blank>{{ house.get("url", "")[:40] }}&hellip;</a></td>
+          <td><a href="{{ house.get("url", "") }}" target=_blank>{{ house.get("url", "")[:60] }}&hellip;</a></td>
           <td>{{ datetime.datetime.fromtimestamp(978285600 + house.get("updatedOn")).strftime("%b %-d, %Y") }} </td>
 
             {% if house.get("availability") %}
