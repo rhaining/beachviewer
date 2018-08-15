@@ -40,12 +40,50 @@
     a {
       color: #d96459;
     }
+    input.date_input {
+      width: 80pt;
+    }
+    input#submit_button {
+      color: #d96459;
+      border: 1px solid #d96459;
+      cursor: pointer;
+      background-color: #fff;
+    }
+    input#submit_button:hover {
+      background-color:rgb(230,230,230)
+    }
     </style>
   </head>
   <body>
       <div id="header">
         <div id="house_count">{{ house_count }} houses found</div>
         <div id="search_params">
+          <form>
+            <input type="submit" value="search beach houses" id="submit_button"/>
+
+            <select name="sort">
+              <option value="" {% if sorted_by is None %}selected="selected"{% end %}>sort by none</option>
+              <option value="cost" {% if sorted_by is "cost" %}selected="selected"{% end %}>sort by cost</option>
+              <option value="beds" {% if sorted_by is "beds" %}selected="selected"{% end %}>sort by bedrooms</option>
+            </select>
+
+            <select name="4x4">
+              <option value="" {% if four_by_four is None %}selected="selected"{% end %}>search all territories</option>
+              <option value="false" {% if four_by_four and four_by_four.lower() == "false" %}selected="selected"{% end %}>exclude 4x4</option>
+              <option value="true" {% if four_by_four and four_by_four.lower() == "true" %}selected="selected"{% end %}>include only 4x4</option>
+            </select>
+            <select name="oceanfront">
+              <option value="true" {% if oceanfront and oceanfront.lower() == "true" %}selected="selected"{% end %}>oceanfront only</option>
+              <option value="false" {% if oceanfront is None or oceanfront.lower() == "false" %}selected="selected"{% end %}>all homes</option>
+            </select>
+
+            start date:
+            <input type="text" name="start_date" value="{{start_date or ""}}" placeholder="yyyy-mm-dd" class="date_input"/>
+            end date:
+            <input type="text" name="end_date" value="{{end_date or ""}}" placeholder="yyyy-mm-dd" class="date_input"/>
+             (yyyy-mm-dd)
+          </form>
+          <!--
       <span class="search_param_section">
         Currently searching:
         {% if oceanfront and oceanfront.lower() == "true" %}
@@ -67,6 +105,7 @@
         Sorted by:
         {{ sorted_by }}
       </span>
+    -->
     </div>
         <div id="saved_searches">
           Saved searches:
