@@ -1,0 +1,66 @@
+td img {
+  height: 80pt;
+}
+table, th, td {
+  border-collapse: collapse;
+  border: 1pt solid rgb(200,200,200);
+  padding: 15pt;
+  color: rgb(50,50,50);
+}
+tbody {
+  overflow: scroll;
+  height: 100pt;
+}
+#header {
+  margin-bottom: 1em;
+  color: rgb(150,150,150);
+}
+#house_count {
+  font-size: 2em;
+  color: #588c7e;
+  font-weight: bold;
+}
+#search_params {
+}
+.search_param_section {
+  margin-right: 20pt;
+}
+#saved_searches {
+  margin-bottom: 10pt;
+}
+#saved_searches a {
+  margin-right: 20pt;
+}
+#realty_list {
+}
+a {
+  color: #d96459;
+}
+input.date_input {
+  width: 80pt;
+}
+input.gps_input {
+  width: 100pt;
+}
+input#submit_button {
+  color: #d96459;
+  border: 1px solid #d96459;
+  cursor: pointer;
+  background-color: #fff;
+}
+input#submit_button:hover {
+  background-color:rgb(230,230,230)
+}
+.map {
+  float: left;
+  margin: 0 20pt 20pt 0;
+  width: 150pt;
+  height: 150pt;
+}
+.table_map {
+  width: 100pt;
+  height: 100pt;
+}
+.oceanfront {
+  font-size: 60pt;
+}

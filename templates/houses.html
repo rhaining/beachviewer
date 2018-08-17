@@ -1,66 +1,17 @@
 <html>
   <head>
     <title>Beach Houses</title>
-    <style>
-    td img {
-      height: 80pt;
-    }
-    table, th, td {
-      border-collapse: collapse;
-      border: 1pt solid rgb(200,200,200);
-      padding: 15pt;
-      color: rgb(50,50,50);
-    }
-    tbody {
-      overflow: scroll;
-      height: 100pt;
-    }
-    #header {
-      margin-bottom: 1em;
-      color: rgb(150,150,150);
-    }
-    #house_count {
-      font-size: 1.7em;
-      color: #588c7e;
-      font-weight: bold;
-    }
-    #search_params {
-    }
-    .search_param_section {
-      margin-right: 20pt;
-    }
-    #saved_searches {
-
-    }
-    #saved_searches a {
-      margin-right: 20pt;
-    }
-    #realty_list {
-    }
-    a {
-      color: #d96459;
-    }
-    input.date_input {
-      width: 80pt;
-    }
-    input#submit_button {
-      color: #d96459;
-      border: 1px solid #d96459;
-      cursor: pointer;
-      background-color: #fff;
-    }
-    input#submit_button:hover {
-      background-color:rgb(230,230,230)
-    }
-    </style>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' rel='stylesheet' />
+    <link href='static/style.css' rel='stylesheet' />
   </head>
   <body>
-      <div id="header">
-        <div id="house_count">{{ house_count }} houses found</div>
-        <div id="search_params">
-          <form>
-            <input type="submit" value="search beach houses" id="submit_button"/>
-
+    <div id="header">
+      <div id="house_count">{{ house_count }} houses found</div>
+      <div id='map' class="map"></div>
+      <div id="search_params">
+        <form>
+          <div>
             <select name="sort">
               <option value="" {% if sorted_by is None %}selected="selected"{% end %}>sort by none</option>
               <option value="cost" {% if sorted_by is "cost" %}selected="selected"{% end %}>sort by cost</option>
@@ -76,39 +27,29 @@
               <option value="true" {% if oceanfront and oceanfront.lower() == "true" %}selected="selected"{% end %}>oceanfront only</option>
               <option value="false" {% if oceanfront is None or oceanfront.lower() == "false" %}selected="selected"{% end %}>all homes</option>
             </select>
+          </div>
 
+          <div>
             start date:
             <input type="text" name="start_date" value="{{start_date or ""}}" placeholder="yyyy-mm-dd" class="date_input"/>
             end date:
             <input type="text" name="end_date" value="{{end_date or ""}}" placeholder="yyyy-mm-dd" class="date_input"/>
              (yyyy-mm-dd)
-          </form>
-          <!--
-      <span class="search_param_section">
-        Currently searching:
-        {% if oceanfront and oceanfront.lower() == "true" %}
-          Oceanfront
-        {% else %}
-          All
-        {% end %}
-        homes
-      </span>
-      <span class="search_param_section">
-        {% if four_by_four and four_by_four.lower() == "true" %}
-        4x4 houses: Only these
-        {% elif four_by_four and four_by_four.lower() == "false" %}
-        4x4 houses: Excluded
-        {% else %}
-        {% end %}
-      </span>
-      <span class="search_param_section">
-        Sorted by:
-        {{ sorted_by }}
-      </span>
-    -->
-    </div>
-        <div id="saved_searches">
-          Saved searches:
+          </div>
+
+          <div>
+           gps latitude:
+           <input type="text" name="nearby_lat" value="{{nearby_lat or ""}}" placeholder="" class="gps_input"/>
+           gps longitude:
+           <input type="text" name="nearby_long" value="{{nearby_long or ""}}" placeholder="" class="gps_input"/>
+
+           <br/>
+           <input type="submit" value="search beach houses" id="submit_button"/>
+         </div>
+        </form>
+      </div>
+      <div id="saved_searches">
+        Saved searches:
         <a href="?">view all houses</a>
 
         <a href="?sort=beds&oceanfront=true&4x4=false">search oceanfront, no 4x4, sort by beds</a>
@@ -127,6 +68,7 @@
           <th>Photo</th>
           <th>Name</th>
           <th>Location</th>
+          <th>Oceanfront</th>
           <th>Highest Cost</th>
           <th>Capacity</th>
           <th>Cost per bed</th>
@@ -137,47 +79,77 @@
             {{ datetime.datetime.fromtimestamp(978285600 + arrival_date).strftime("%b %-d, %Y") }}
           </th>
           {% end %}
-          <!-- <th>Availabilities</th> -->
         </tr>
       </thead>
       <tbody>
         {% for house in houses %}
-      <tr>
-        {% block house %}
-          <td>{{ house.get("rentalAgency", "") }}</td>
-          <td>
-            {% if house.get("images") %}
-            <a href="{{ house.get("images")[0] }}" target="_blank"><img src="{{ house.get("images")[0] }}"/></a>
-            {% end %}
-          </td>
-          <td>{{ house["name"] }}</td>
-          <td>
-            {{ house.get("regionName", "??") }}
-            [<a href="http://maps.google.com/?q={{ house.get("latitude", "") }},{{ house.get("longitude", "") }}" target=_blank>map it</a>]
-            [<a href="?nearby_lat={{ house.get("latitude", "") }}&nearby_long={{ house.get("longitude", "") }}">nearby</a>]
-          </td>
-          <td>${{ house.get("maxRate", "?") }}</td>
-          <td>{{ house.get("bedrooms", "?") }} bed / {{ house.get("bathrooms", "?") }} bath</td>
-          <td>${{ round(house.get("maxRate", 0) / house.get("bedrooms", 1)) }}</td>
-          <td><a href="{{ house.get("url", "") }}" target=_blank>{{ house.get("url", "")[:60] }}&hellip;</a></td>
-          <td>{{ datetime.datetime.fromtimestamp(978285600 + house.get("updatedOn")).strftime("%b %-d, %Y") }} </td>
+          <tr>
+            {% block house %}
+              <td>{{ house.get("rentalAgency", "") }}</td>
+              <td>
+                {% if house.get("images") %}
+                <a href="{{ house.get("images")[0] }}" target="_blank"><img src="{{ house.get("images")[0] }}"/></a>
+                {% end %}
+              </td>
+              <td>{{ house["name"] }}</td>
+              <td>
+                {{ house.get("regionName", "??") }}
+                [<a href="http://maps.google.com/?q={{ house.get("latitude", "") }},{{ house.get("longitude", "") }}" target=_blank>map it</a>]
+                [<a href="?nearby_lat={{ house.get("latitude", "") }}&nearby_long={{ house.get("longitude", "") }}">nearby</a>]
+              </td>
+              <td><div class="oceanfront">{% if house.get("oceanfront") %} 🏖 {% end %}</div></td>
+              <td>${{ house.get("maxRate", "?") }}</td>
+              <td>{{ house.get("bedrooms", "?") }} bed / {{ house.get("bathrooms", "?") }} bath</td>
+              <td>${{ round(house.get("maxRate", 0) / house.get("bedrooms", 1)) }}</td>
+              <td><a href="{{ house.get("url", "") }}" target=_blank>{{ house.get("url", "")[:50] }}&hellip;</a></td>
+              <td>{{ datetime.datetime.fromtimestamp(978285600 + house.get("updatedOn")).strftime("%b %-d, %Y") }} </td>
 
-            {% if house.get("availability") %}
-              {% for arrival_date in arrival_dates %}
-                <td>
-                  {% for availability in house.get("availability") %}
-                    {% if availability.get("isAvailable") and (availability.get("arrivalDate") == arrival_date) or (availability.get("arrivalDate") - 86400 == arrival_date) or (availability.get("arrivalDate") + 86400 == arrival_date) %}
-                      ${{ round(availability.get("totalCost")) }}
-                      {% break %}
+              {% if house.get("availability") %}
+                {% for arrival_date in arrival_dates %}
+                  <td>
+                    {% for availability in house.get("availability") %}
+                      {% if availability.get("isAvailable") and (availability.get("arrivalDate") == arrival_date) or (availability.get("arrivalDate") - 86400 == arrival_date) or (availability.get("arrivalDate") + 86400 == arrival_date) %}
+                        ${{ round(availability.get("totalCost")) }}
+                        {% break %}
+                      {% end %}
                     {% end %}
-                  {% end %}
-                </td>
+                  </td>
+                {% end %}
               {% end %}
             {% end %}
+          </tr>
         {% end %}
-      </tr>
-      {% end %}
-    </tbody>
+      </tbody>
     </table>
   </body>
+
+  <script>
+    {% if nearby_lat and nearby_long %}
+      mapboxgl.accessToken = 'pk.eyJ1IjoidG9sYXIiLCJhIjoiY2luMXVndGw1MGI0cHdibHU1OXFtMGxkNyJ9.89FDP3XpLOwyWxmU-OA1Kw';
+      var map_center = [{{nearby_long}}, {{nearby_lat}}];
+      var map_style = 'mapbox://styles/mapbox/satellite-streets-v10';
+      var map = new mapboxgl.Map({container: 'map', style: map_style, center: map_center, zoom: 13.5});
+
+      function addHouseMarker(lat, long, name, url) {
+        var popup = new mapboxgl.Popup()
+          .setLngLat([long, lat])
+          .setHTML("<a href='" + url + "' target=_blank>" + name + "</a>");
+        var marker = new mapboxgl.Marker()
+          .setLngLat([long, lat])
+          .setPopup(popup)
+          .addTo(map);
+      }
+
+      {% for house in houses %}
+          addHouseMarker(
+            {{house.get("latitude", "")}},
+            {{house.get("longitude", "")}},
+            "{{ house["name"] }}",
+            "{{ house.get("url", "") }}"
+          );
+      {% end %}
+    {% else %}
+      document.getElementById("map").style.display = "none";
+    {% end %}
+  </script>
 </html>
