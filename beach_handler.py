@@ -69,6 +69,7 @@ class BeachHandler(tornado.web.RequestHandler):
 
         houses = []
         arrival_dates = []
+        today = int(time.time()) - 978285600
         for house in house_query:
             if house.get("maxRate") is None and house.get("availability") is not None:
                 total_costs = [a.get("totalCost") for a in house.get("availability")]
@@ -86,7 +87,7 @@ class BeachHandler(tornado.web.RequestHandler):
 
                     nextDay = arrivalDate + 86400
                     previousDay = arrivalDate - 86400
-                    if arrivalDate not in arrival_dates and nextDay not in arrival_dates and previousDay not in arrival_dates:
+                    if arrivalDate > today and arrivalDate not in arrival_dates and nextDay not in arrival_dates and previousDay not in arrival_dates:
                         arrival_dates.append(arrivalDate)
 
         arrival_dates.sort()
