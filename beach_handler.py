@@ -74,9 +74,11 @@ class BeachHandler(tornado.web.RequestHandler):
         today = int(time.time()) - 978285600
         for house in house_query:
             if house.get("maxRate") is None and house.get("availability") is not None:
-                total_costs = [a.get("totalCost") for a in house.get("availability")]
+                total_costs = [a.get("totalCost", -1) for a in house.get("availability")]
                 if total_costs:
-                    house["maxRate"] = max(total_costs)
+                    max_cost = max(total_costs)
+                    if max_cost > 0:
+                        house["maxRate"] = max_cost
 
             houses.append(house)
 
