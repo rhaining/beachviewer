@@ -109,7 +109,11 @@
                   <td>
                     {% for availability in house.get("availability") %}
                       {% if availability.get("isAvailable") and (availability.get("arrivalDate") == arrival_date) or (availability.get("arrivalDate") - 86400 == arrival_date) or (availability.get("arrivalDate") + 86400 == arrival_date) %}
-                        ${{ round(availability.get("totalCost")) }}
+                        {% if availability.get("totalCost") %}
+                          ${{ round(availability.get("totalCost")) }}
+                        {% else %}
+                          <div class="unknown_cost">Not set</div>
+                        {% end %}
                         {% break %}
                       {% end %}
                     {% end %}

@@ -64,3 +64,6 @@ input#submit_button:hover {
 .oceanfront {
   font-size: 60pt;
 }
+.unknown_cost {
+  color: rgb(150,150,150);
+}
