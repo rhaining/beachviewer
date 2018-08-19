@@ -15,6 +15,8 @@ class BeachHandler(tornado.web.RequestHandler):
         beach_db = myclient["beach"]
         house_collection = beach_db["house"]
 
+        rental_agencies = house_collection.distinct("rentalAgency")
+
         house_query_options = {}
 
         oceanfront = self.get_argument('oceanfront', None)
@@ -94,5 +96,5 @@ class BeachHandler(tornado.web.RequestHandler):
 
         templates_dir = os.environ.get("TEMPLATES_DIR")
         loader = tornado.template.Loader(templates_dir)
-        html_output = loader.load("houses.html").generate(house_count=len(houses), houses=houses, arrival_dates=arrival_dates, oceanfront=oceanfront, sorted_by=sorted_by, four_by_four=four_by_four, start_date=start_date, end_date=end_date, nearby_lat=nearby_lat, nearby_long=nearby_long)
+        html_output = loader.load("houses.html").generate(house_count=len(houses), houses=houses, arrival_dates=arrival_dates, oceanfront=oceanfront, sorted_by=sorted_by, four_by_four=four_by_four, start_date=start_date, end_date=end_date, nearby_lat=nearby_lat, nearby_long=nearby_long, rental_agencies=rental_agencies)
         self.write(html_output)
