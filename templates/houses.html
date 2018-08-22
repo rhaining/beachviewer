@@ -3,6 +3,7 @@
     <title>Beach Houses</title>
     <script src='https://api.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="static/lozad.js"></script>
     <link href='static/style.css' rel='stylesheet' />
   </head>
   <body>
@@ -88,7 +89,7 @@
               <td>{{ house.get("rentalAgency", "") }}</td>
               <td>
                 {% if house.get("images") %}
-                <a href="{{ house.get("images")[0] }}" target="_blank"><img src="{{ house.get("images")[0] }}"/></a>
+                <a href="{{ house.get("images")[0] }}" target="_blank"><img data-src="{{ house.get("images")[0] }}" class="lozad"/></a>
                 {% end %}
               </td>
               <td>{{ house["name"] }}</td>
@@ -155,5 +156,8 @@
     {% else %}
       document.getElementById("map").style.display = "none";
     {% end %}
+
+    const observer = lozad(); // lazy loads elements with default selector as ".lozad"
+    observer.observe();
   </script>
 </html>
