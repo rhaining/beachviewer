@@ -24,7 +24,7 @@ class BeachHandler(tornado.web.RequestHandler):
     def get(self):
         house_collection = self.mongo_house_collection()
 
-        rental_agencies = house_collection.distinct("rentalAgency")
+        rental_agencies = sorted(house_collection.distinct("rentalAgency"))
 
         house_query_options = {}
 
