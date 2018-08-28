@@ -5,6 +5,11 @@ import datetime
 import time
 import os
 
+class BeachTime:
+    @staticmethod
+    def secondsSince2000():
+        return 978285600
+
 class BeachHandler(tornado.web.RequestHandler):
     def get(self):
         username = os.environ.get("MONGO_USER")
@@ -43,7 +48,7 @@ class BeachHandler(tornado.web.RequestHandler):
         start_time = None
         if start_date:
             start_datetime_object = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-            start_time = time.mktime(start_datetime_object.timetuple()) - 978285600
+            start_time = time.mktime(start_datetime_object.timetuple()) - BeachTime.secondsSince2000()
             house_query_options["availability.arrivalDate"] = { "$gte": start_time }
             house_query_options["availability.isAvailable"] = True
 
@@ -51,7 +56,7 @@ class BeachHandler(tornado.web.RequestHandler):
         end_time = None
         if end_date:
             end_datetime_object = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-            end_time = time.mktime(end_datetime_object.timetuple()) - 978285600
+            end_time = time.mktime(end_datetime_object.timetuple()) - BeachTime.secondsSince2000()
             house_query_options["availability.arrivalDate"] = { "$lte": end_time }
             house_query_options["availability.isAvailable"] = True
 
@@ -71,7 +76,7 @@ class BeachHandler(tornado.web.RequestHandler):
 
         houses = []
         arrival_dates = []
-        today = int(time.time()) - 978285600
+        today = int(time.time()) - BeachTime.secondsSince2000()
         for house in house_query:
             if house.get("maxRate") is None and house.get("availability") is not None:
                 total_costs = [a.get("totalCost", -1) for a in house.get("availability")]

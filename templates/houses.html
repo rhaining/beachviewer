@@ -1,3 +1,4 @@
+{% from beach_handler import BeachTime %}
 <html>
   <head>
     <title>Beach Houses</title>
@@ -77,7 +78,7 @@
           <th>Last updated from rental agency</th>
           {% for arrival_date in arrival_dates %}
           <th>
-            {{ datetime.datetime.fromtimestamp(978285600 + arrival_date).strftime("%b %-d, %Y") }}
+            {{ datetime.datetime.fromtimestamp(BeachTime.secondsSince2000() + arrival_date).strftime("%b %-d, %Y") }}
           </th>
           {% end %}
         </tr>
@@ -103,7 +104,7 @@
               <td>{{ house.get("bedrooms", "?") }} bed / {{ house.get("bathrooms", "?") }} bath</td>
               <td>${{ round(house.get("maxRate", 0) / house.get("bedrooms", 1)) }}</td>
               <td><a href="{{ house.get("url", "") }}" target=_blank>{{ house.get("url", "")[:50] }}&hellip;</a></td>
-              <td>{{ datetime.datetime.fromtimestamp(978285600 + house.get("updatedOn")).strftime("%b %-d, %Y") }} </td>
+              <td>{{ datetime.datetime.fromtimestamp(BeachTime.secondsSince2000() + house.get("updatedOn")).strftime("%b %-d, %Y") }} </td>
 
               {% if house.get("availability") %}
                 {% for arrival_date in arrival_dates %}
