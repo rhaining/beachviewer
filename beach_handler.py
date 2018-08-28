@@ -7,11 +7,11 @@ import os
 
 class BeachTime:
     @staticmethod
-    def secondsSince2000():
+    def seconds_since_2000():
         return 978285600
 
 class BeachHandler(tornado.web.RequestHandler):
-    def get(self):
+    def mongo_house_collection(self):
         username = os.environ.get("MONGO_USER")
         password = os.environ.get("MONGO_PASS")
         server = os.environ.get("MONGO_HOST")
@@ -19,6 +19,10 @@ class BeachHandler(tornado.web.RequestHandler):
         myclient = pymongo.MongoClient(mongo_url)
         beach_db = myclient["beach"]
         house_collection = beach_db["house"]
+        return house_collection
+
+    def get(self):
+        house_collection = self.mongo_house_collection()
 
         rental_agencies = house_collection.distinct("rentalAgency")
 
@@ -48,7 +52,7 @@ class BeachHandler(tornado.web.RequestHandler):
         start_time = None
         if start_date:
             start_datetime_object = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-            start_time = time.mktime(start_datetime_object.timetuple()) - BeachTime.secondsSince2000()
+            start_time = time.mktime(start_datetime_object.timetuple()) - BeachTime.seconds_since_2000()
             house_query_options["availability.arrivalDate"] = { "$gte": start_time }
             house_query_options["availability.isAvailable"] = True
 
@@ -56,7 +60,7 @@ class BeachHandler(tornado.web.RequestHandler):
         end_time = None
         if end_date:
             end_datetime_object = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-            end_time = time.mktime(end_datetime_object.timetuple()) - BeachTime.secondsSince2000()
+            end_time = time.mktime(end_datetime_object.timetuple()) - BeachTime.seconds_since_2000()
             house_query_options["availability.arrivalDate"] = { "$lte": end_time }
             house_query_options["availability.isAvailable"] = True
 
@@ -76,7 +80,7 @@ class BeachHandler(tornado.web.RequestHandler):
 
         houses = []
         arrival_dates = []
-        today = int(time.time()) - BeachTime.secondsSince2000()
+        today = int(time.time()) - BeachTime.seconds_since_2000()
         for house in house_query:
             if house.get("maxRate") is None and house.get("availability") is not None:
                 total_costs = [a.get("totalCost", -1) for a in house.get("availability")]
