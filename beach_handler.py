@@ -4,6 +4,10 @@ import pymongo
 import datetime
 import time
 import os
+# from tornado.escape import json_encode
+from bson import Binary, Code
+from bson.json_util import dumps
+import json
 
 class BeachTime:
     @staticmethod
@@ -25,9 +29,11 @@ class BeachHandler(tornado.web.RequestHandler):
         house_collection = self.mongo_house_collection()
 
         rental_agencies = sorted(house_collection.distinct("rentalAgency"))
+        
+        today = int(time.time()) - BeachTime.seconds_since_2000()
 
         house_query_options = {}
-
+        
         oceanfront = self.get_argument('oceanfront', None)
         if oceanfront and oceanfront.lower() == "true":
             house_query_options["oceanfront"] = True
@@ -63,8 +69,16 @@ class BeachHandler(tornado.web.RequestHandler):
             end_time = time.mktime(end_datetime_object.timetuple()) - BeachTime.seconds_since_2000()
             house_query_options["availability.arrivalDate"] = { "$lte": end_time }
             house_query_options["availability.isAvailable"] = True
+            
+        # if not updated in past 30 days, ignore it…
+        house_query_options["updatedOn"] = { "$gte": today - 2592000 }
 
-        house_query = house_collection.find(house_query_options)
+        page = int(self.get_argument('page', 0))  
+        limit = 100
+        skip = page * limit
+
+        house_query = house_collection.find(house_query_options).skip(skip).limit(limit)
+        total_house_count = house_query.count()
 
         sort_query = self.get_argument('sort', None)
         sorted_by = None
@@ -80,7 +94,6 @@ class BeachHandler(tornado.web.RequestHandler):
 
         houses = []
         arrival_dates = []
-        today = int(time.time()) - BeachTime.seconds_since_2000()
         for house in house_query:
             if house.get("maxRate") is None and house.get("availability") is not None:
                 total_costs = [a.get("totalCost", -1) for a in house.get("availability")]
@@ -103,9 +116,41 @@ class BeachHandler(tornado.web.RequestHandler):
                     if arrivalDate > today and arrivalDate not in arrival_dates and nextDay not in arrival_dates and previousDay not in arrival_dates:
                         arrival_dates.append(arrivalDate)
 
+                if house.get("availability"):
+                    availabilities = []
+                    for arrival_date in arrival_dates:
+                        for availability in house.get("availability"):
+                            if availability.get("isAvailable") and (availability.get("arrivalDate") == arrival_date) or (availability.get("arrivalDate") - 86400 == arrival_date) or (availability.get("arrivalDate") + 86400 == arrival_date):
+                                if availability.get("totalCost"):
+                                    availabilities.append("$%d" % round(availability.get("totalCost")))
+                                else:
+                                    availabilities.append("none")
+                                break
+                    house["json_availabilities"] = availabilities
+
         arrival_dates.sort()
+                
+        template_name = ""
+        is_json = self.get_argument('json', None)
+        whitespace = ""
+        if is_json:
+            # self.write(dumps(houses))
+            template_name = "houses.json"
+            whitespace = "oneline"
+
+            # availabilities_str = ", ".join(availabilities)
+        else:
+            template_name = "houses.html"
+            whitespace = "all"
+            # next_page = page + 1
+            # json_url = "/?json=1&oceanfront=%s4x4=%s&nearby_lat=%s&nearby_long=%s&start_date=%s&end_date=%s&sort=%s" % (oceanfront, four_by_four, nearby_lat, nearby_long, start_date, end_date, sort_query)
 
         templates_dir = os.environ.get("TEMPLATES_DIR")
-        loader = tornado.template.Loader(templates_dir)
-        html_output = loader.load("houses.html").generate(house_count=len(houses), houses=houses, arrival_dates=arrival_dates, oceanfront=oceanfront, sorted_by=sorted_by, four_by_four=four_by_four, start_date=start_date, end_date=end_date, nearby_lat=nearby_lat, nearby_long=nearby_long, rental_agencies=rental_agencies)
-        self.write(html_output)
+        loader = tornado.template.Loader(templates_dir, whitespace=whitespace)
+        output = loader.load(template_name).generate(house_count=total_house_count, houses=houses, arrival_dates=arrival_dates, oceanfront=oceanfront, sorted_by=sorted_by, four_by_four=four_by_four, start_date=start_date, end_date=end_date, nearby_lat=nearby_lat, nearby_long=nearby_long, rental_agencies=rental_agencies, page=page)
+
+        # if is_json:
+        #     parsed = json.loads(output)
+        #     output = json.dumps(parsed, indent=4)
+
+        self.write(output)

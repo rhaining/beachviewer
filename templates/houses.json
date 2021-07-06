@@ -1,0 +1,30 @@
+{% from beach_handler import BeachTime %}
+{
+  "houses": [
+    {% for house_idx, house in enumerate(houses) %}
+      {
+        "rentalAgency": "{{ house.get("rentalAgency", "") }}",
+        "image": {% if house.get("images") %}"{{ house.get("images")[0] }}"{% else %}null{% end %},
+        "name": "{{ house["name"] }}",
+        "regionName": "{{ house.get("regionName", "??") }}",
+        "mapURL": "http://maps.google.com/?q={{ house.get("latitude", "") }},{{ house.get("longitude", "") }}",
+        "nearbyURL": "?nearby_lat={{ house.get("latitude", "") }}&nearby_long={{ house.get("longitude", "") }}",
+        "oceanfront": "{% if house.get("oceanfront") %} 🏖 {% end %}",
+        "cost": "${{ house.get("maxRate", "?") }}",
+        "bedrooms": "{{ house.get("bedrooms", "?") }}",
+        "bathrooms": "{{ house.get("bathrooms", "?") }}",
+        "costPerBed": "${{ round(house.get("maxRate", 0) / house.get("bedrooms", 1)) }}",
+        "url": "{{ house.get("url", "") }}",
+        "truncatedURL": "{{ house.get("url", "")[:50] }}&hellip;",
+        "updatedOn": "{{ datetime.datetime.fromtimestamp(BeachTime.seconds_since_2000() + house.get("updatedOn")).strftime("%b %-d, %Y") }}",
+        "availability": [
+          {% if house.get("json_availabilities") %}
+            {% for avail_idx, availability in enumerate(house.get("json_availabilities")) %}
+              "{{ availability }}"{% if avail_idx < len(house.get("json_availabilities"))-1 %},{% end %}
+            {% end %}
+          {% end %}
+        ]
+      }{% if house_idx < len(houses)-1 %},{% end %}
+    {% end %}
+  ]
+}
