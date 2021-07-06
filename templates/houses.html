@@ -5,19 +5,20 @@
     <script src='https://api.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' rel='stylesheet' />
     <script src="static/lozad.js"></script>
+    <script src="static/util.js"></script>
     <link href='static/style.css' rel='stylesheet' />
   </head>
-  <body>
+  <body onload="load_next_page()">
     <div id="header">
-      <div id="house_count">{{ house_count }} houses found</div>
+      <div id="house_count">{{ house_count }} houses found <img src="static/loading.gif" id="loading-indicator"/></div>
       <div id='map' class="map"></div>
       <div id="search_params">
         <form>
           <div>
             <select name="sort">
               <option value="" {% if sorted_by is None %}selected="selected"{% end %}>sort by none</option>
-              <option value="cost" {% if sorted_by is "cost" %}selected="selected"{% end %}>sort by cost</option>
-              <option value="beds" {% if sorted_by is "beds" %}selected="selected"{% end %}>sort by bedrooms</option>
+              <option value="cost" {% if sorted_by == "cost" %}selected="selected"{% end %}>sort by cost</option>
+              <option value="beds" {% if sorted_by == "beds" %}selected="selected"{% end %}>sort by bedrooms</option>
             </select>
 
             <select name="4x4">
@@ -83,7 +84,7 @@
           {% end %}
         </tr>
       </thead>
-      <tbody>
+      <tbody id="tbody">
         {% for house in houses %}
           <tr>
             {% block house %}
@@ -129,7 +130,7 @@
     </table>
   </body>
 
-  <script>
+  <script type="text/javascript">
     {% if nearby_lat and nearby_long %}
       mapboxgl.accessToken = 'pk.eyJ1IjoidG9sYXIiLCJhIjoiY2luMXVndGw1MGI0cHdibHU1OXFtMGxkNyJ9.89FDP3XpLOwyWxmU-OA1Kw';
       var map_center = [{{nearby_long}}, {{nearby_lat}}];
@@ -160,5 +161,40 @@
 
     const observer = lozad(); // lazy loads elements with default selector as ".lozad"
     observer.observe();
+
+    var page = {{ page }};
+    
+    function load_next_page() {
+      var url = window.location
+      if (url.toString().indexOf("?") !== -1) {
+        url += "&"
+      } else {
+        url += "?"
+      }
+      page = page + 1
+      url += "json=1&page=" + String(page)
+      // console.log("url = " + url)
+      var completion = function(raw_data){
+        var results = JSON.parse(raw_data)
+        houses = results["houses"]
+
+        if(houses.length > 0) {
+          var buffer = ""
+          for (var i=0; i < houses.length; i++) {
+            var h = houses[i]
+            // add_house(h)
+            var html = get_house_row(h)
+            buffer += html
+          }
+          document.getElementById("tbody").innerHTML += buffer
+          observer.observe();
+          
+          load_next_page()
+        } else {
+          document.getElementById("loading-indicator").style.display = "none";
+        }
+      }
+      loadRemoteDoc(url, completion)
+    }
   </script>
 </html>
