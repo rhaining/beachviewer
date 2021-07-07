@@ -59,16 +59,17 @@ class BeachHandler(tornado.web.RequestHandler):
         if start_date:
             start_datetime_object = datetime.datetime.strptime(start_date, '%Y-%m-%d')
             start_time = time.mktime(start_datetime_object.timetuple()) - BeachTime.seconds_since_2000()
-            house_query_options["availability.arrivalDate"] = { "$gte": start_time }
-            house_query_options["availability.isAvailable"] = True
+            house_query_options["availability"] = {"$elemMatch": {"arrivalDate": { "$gte": start_time }, "isAvailable": True}}
 
         end_date = self.get_argument('end_date', None)
         end_time = None
         if end_date:
             end_datetime_object = datetime.datetime.strptime(end_date, '%Y-%m-%d')
             end_time = time.mktime(end_datetime_object.timetuple()) - BeachTime.seconds_since_2000()
-            house_query_options["availability.arrivalDate"] = { "$lte": end_time }
-            house_query_options["availability.isAvailable"] = True
+            if house_query_options.get("availability") == None:
+                house_query_options["availability"] = {"$elemMatch": {"departureDate": { "$lte": end_time }, "isAvailable": True}}
+            else:
+                house_query_options["availability"]["$elemMatch"]["departureDate"] = { "$lte": end_time }
             
         # if not updated in past 30 days, ignore it…
         house_query_options["updatedOn"] = { "$gte": today - 2592000 }
