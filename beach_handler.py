@@ -120,11 +120,14 @@ class BeachHandler(tornado.web.RequestHandler):
                     availabilities = []
                     for arrival_date in arrival_dates:
                         for availability in house.get("availability"):
-                            if availability.get("isAvailable") and (availability.get("arrivalDate") == arrival_date) or (availability.get("arrivalDate") - 86400 == arrival_date) or (availability.get("arrivalDate") + 86400 == arrival_date):
-                                if availability.get("totalCost"):
-                                    availabilities.append("$%d" % round(availability.get("totalCost")))
+                            if (availability.get("arrivalDate") == arrival_date) or (availability.get("arrivalDate") - 86400 == arrival_date) or (availability.get("arrivalDate") + 86400 == arrival_date):
+                                if availability.get("isAvailable"):
+                                    if availability.get("totalCost"):
+                                        availabilities.append("$%d" % round(availability.get("totalCost")))
+                                    else:
+                                        availabilities.append("Not set.")
                                 else:
-                                    availabilities.append("none")
+                                    availabilities.append(" ")
                                 break
                     house["json_availabilities"] = availabilities
 
