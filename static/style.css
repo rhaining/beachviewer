@@ -21,7 +21,12 @@ tbody {
   font-weight: bold;
 }
 #loading-indicator {
-  height: 20pt;
+  position: absolute;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
 }
 #search_params {
 }
@@ -29,12 +34,14 @@ tbody {
   margin-right: 20pt;
 }
 #saved_searches {
-  margin-bottom: 10pt;
+  /* margin-bottom: 10pt; */
+  font-size: 0.75em;
 }
 #saved_searches a {
   margin-right: 20pt;
 }
 #realty_list {
+  font-size: 0.5em;
 }
 a {
   color: #d96459;
@@ -46,13 +53,18 @@ input.gps_input {
   width: 100pt;
 }
 input#submit_button {
-  color: #d96459;
-  border: 1px solid #d96459;
+  color: #fff; //#d96459;
+  border: 4pt solid #d96459;
   cursor: pointer;
-  background-color: #fff;
+  background-color: #d96459; //#fff;
+  margin: 10pt 0pt;
+  padding: 10pt 20pt;
+  font-size: 1em;
+  font-weight: bold;
 }
 input#submit_button:hover {
-  background-color:rgb(230,230,230)
+  /* background-color:rgb(230,230,230) */
+  opacity: 65%;
 }
 .map {
   float: left;

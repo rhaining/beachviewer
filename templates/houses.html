@@ -9,8 +9,9 @@
     <link href='static/style.css' rel='stylesheet' />
   </head>
   <body onload="load_next_page()">
+    <img src="static/loading.gif" id="loading-indicator"/></div>
     <div id="header">
-      <div id="house_count">{{ house_count }} houses found <img src="static/loading.gif" id="loading-indicator"/></div>
+      <div id="house_count">{{ house_count }} houses found across the Outer Banks
       <div id='map' class="map"></div>
       <div id="search_params">
         <form>
@@ -57,7 +58,7 @@
 
         <a href="?sort=beds&oceanfront=true&4x4=false">search oceanfront, no 4x4, sort by beds</a>
 
-        <a href="?sort=beds&oceanfront=true&4x4=false&start_date=2019-06-01&end_date=2019-08-01">search oceanfront, no 4x4, sort by beds, just summer 2019</a>
+        <a href="?sort=beds&oceanfront=true&4x4=false&start_date=2021-06-01&end_date=2021-09-01">search oceanfront, no 4x4, sort by beds, just summer 2021</a>
       </div>
       <div id="realty_list">
         (Currently searching: {{", ".join(rental_agencies)}}.)
@@ -72,11 +73,11 @@
           <th>Name</th>
           <th>Location</th>
           <th>Oceanfront</th>
-          <th>Highest Cost</th>
+          <th>Highest cost</th>
           <th>Capacity</th>
           <th>Cost per bed</th>
-          <th>Link</th>
-          <th>Last updated from rental agency</th>
+          <th>Reservation link</th>
+          <th>Last updated</th>
           {% for arrival_date in arrival_dates %}
           <th>
             {{ datetime.datetime.fromtimestamp(BeachTime.seconds_since_2000() + arrival_date).strftime("%b %-d, %Y") }}
@@ -111,7 +112,11 @@
                 {% for arrival_date in arrival_dates %}
                   <td>
                     {% for availability in house.get("availability") %}
-                      {% if availability.get("isAvailable") and (availability.get("arrivalDate") == arrival_date) or (availability.get("arrivalDate") - 86400 == arrival_date) or (availability.get("arrivalDate") + 86400 == arrival_date) %}
+                      {% if availability.get("isAvailable") and (\
+                              (availability.get("arrivalDate") == arrival_date) \
+                              or (availability.get("arrivalDate") - 86400 == arrival_date) \
+                              or (availability.get("arrivalDate") + 86400 == arrival_date)\
+                              ) %}
                         {% if availability.get("totalCost") %}
                           ${{ round(availability.get("totalCost")) }}
                         {% else %}
