@@ -34,6 +34,10 @@ class BeachHandler(tornado.web.RequestHandler):
 
         house_query_options = {}
         
+        rental_agency_filter = self.get_argument('agency', None)
+        if rental_agency_filter:
+            house_query_options["rentalAgency"] = rental_agency_filter
+        
         oceanfront = self.get_argument('oceanfront', None)
         if oceanfront and oceanfront.lower() == "true":
             house_query_options["oceanfront"] = True
@@ -75,7 +79,7 @@ class BeachHandler(tornado.web.RequestHandler):
         house_query_options["updatedOn"] = { "$gte": today - 2592000 }
 
         page = int(self.get_argument('page', 0))  
-        limit = 100
+        limit = 500
         skip = page * limit
 
         house_query = house_collection.find(house_query_options).skip(skip).limit(limit)

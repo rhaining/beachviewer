@@ -61,7 +61,12 @@
         <a href="?sort=beds&oceanfront=true&4x4=false&start_date=2021-06-01&end_date=2021-09-01">search oceanfront, no 4x4, sort by beds, just summer 2021</a>
       </div>
       <div id="realty_list">
-        (Currently searching: {{", ".join(rental_agencies)}}.)
+        Aggregated from: 
+        {% for agency in rental_agencies %}
+          <a href="?agency={{agency}}">{{agency}}</a>
+        {% end %}
+        
+        <!-- {{", ".join(rental_agencies)}}.) -->
       </div>
     </div>
 
